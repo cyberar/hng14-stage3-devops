@@ -13,6 +13,12 @@ services:
   nextcloud:
     image: kefaslungu/hng-nextcloud:latest    # pre-built image
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/status.php"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     volumes:
       - HNG-nginx-logs:/var/log/nginx/hng-access-log:ro    # ":ro" = read-only
     networks:
