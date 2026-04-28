@@ -47,7 +47,7 @@ services:
 
   detector:
     build:
-      context: ./detector
+      context: .
       dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:

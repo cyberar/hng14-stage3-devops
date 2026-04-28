@@ -54,7 +54,7 @@ RUN pip install --no-cache-dir --upgrade pip \
 # Copy your Python source files into the container.
 # We copy after pip install so code changes don't invalidate the
 # dependency cache layer (only changed source triggers a fast rebuild).
-COPY *.py .
+COPY *.py ./
 
 # Log directory
 # Create the audit log directory inside the container.
