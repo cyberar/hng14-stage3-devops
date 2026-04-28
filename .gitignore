@@ -1,0 +1,8 @@
+.env
+ddos-venv/
+notes
+notes-docker-compose
+__pycache__/
+.pyc
+.pycache__/
+*.logs

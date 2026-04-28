@@ -1,0 +1,85 @@
+version: "3.9"
+
+volumes:
+  HNG-nginx-logs:
+    driver: local    # "local" = standard Docker volume stored on the host filesystem
+
+networks:
+
+  hng-net:
+    driver: bridge    # "bridge" = standard Docker virtual network
+
+services:
+  nextcloud:
+    image: kefaslungu/hng-nextcloud:latest    # pre-built image
+    restart: unless-stopped
+    volumes:
+      - HNG-nginx-logs:/var/log/nginx/hng-access-log:ro    # ":ro" = read-only
+    networks:
+      - hng-net
+
+  nginx:
+    image: nginx:1.25-alpine    
+    restart: unless-stopped
+    depends_on:
+      nextcloud:
+        condition: service_healthy    # don't start until Nextcloud is ready
+    ports:
+      - "80:80"      # HTTP traffic
+      # - "443:443"  # HTTPS traffic
+
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro # mount custom nginx/nginx.conf to the default
+      - HNG-nginx-logs:/var/log/nginx:rw    # ":rw" = read-write shared access log
+    networks:
+      - hng-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/nginx-health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    # Limit resources: prevent a misconfigured Nginx from starving other containers.
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  detector:
+    build:
+      context: ./detector
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      nginx:
+        condition: service_healthy    # Nginx must be running and writing logs first
+    network_mode: host
+    # Linux capabilities: grant specific kernel-level permissions.
+    cap_add:
+      - NET_ADMIN     # allows running iptables, ip commands
+      - NET_RAW       # allows raw socket access (needed by some iptables operations)
+
+    # Environment variables passed into the detector container.
+    environment:
+      # Python won't buffer stdout/stderr — logs appear immediately in "docker logs"
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL}
+      PYTHONUNBUFFERED: "1"
+
+      # Set Python's locale to UTF-8 to handle non-ASCII characters in log lines
+      PYTHONIOENCODING: "utf-8"
+
+      # Log level for the daemon (DEBUG, INFO, WARNING, ERROR)
+      LOG_LEVEL: "INFO"
+
+    volumes:
+      - HNG-nginx-logs:/var/log/nginx:ro
+      - /var/log/detector:/var/log/detector:rw
+      - ./detector/config.yaml:/app/config.yaml:ro
+
+    # Health check: hit the detector's /health endpoint.
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s    # give Python time to start and warm up
