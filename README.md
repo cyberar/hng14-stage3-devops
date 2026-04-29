@@ -24,13 +24,13 @@ This project is part of HNG14 stage 3 task.
 
 Apart from **Python** being my first choice of language, I chose it for four specific reasons:
 
-1. **`collections.deque`** — Python's built-in double-ended queue is exactly the right data structure for a sliding window. It supports O(1) append and O(1) popleft, meaning evicting old timestamps from the left end of the window costs nothing regardless of window size. A list would cost O(n) for every eviction.
+1. **`collections.deque`** - Python's built-in double-ended queue is exactly the right data structure for a sliding window. It supports O(1) append and O(1) popleft, meaning evicting old timestamps from the left end of the window costs nothing regardless of window size.
 
-2. **Standard library is sufficient** — the entire daemon uses only `collections`, `threading`, `subprocess`, `math`, and `json` from the standard library. No heavy framework needed for the core logic.
+2. **Standard library is sufficient** - the entire daemon uses only `collections`, `threading`, `subprocess`, `math`, and `json` from the standard library. No heavy framework needed for the core logic.
 
-3. **Flask for the dashboard** — a minimal web framework that adds a live metrics HTTP server in under 50 lines without complexity.
+3. **Flask for the dashboard** - a minimal web framework that adds a live metrics HTTP server in under 50 lines without complexity.
 
-4. **Readable detection logic** — the z-score calculation, baseline recalculation, and iptables subprocess calls are all straightforward to read, audit, and modify.
+4. **Readable detection logic** - the z-score calculation, baseline recalculation, and iptables subprocess calls are all straightforward to read, audit, and modify.
 
 ---
 
