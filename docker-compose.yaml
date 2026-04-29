@@ -5,7 +5,6 @@ volumes:
     driver: local    # "local" = standard Docker volume stored on the host filesystem
 
 networks:
-
   hng-net:
     driver: bridge    # "bridge" = standard Docker virtual network
 
@@ -80,7 +79,7 @@ services:
     volumes:
       - HNG-nginx-logs:/var/log/nginx:ro
       - /var/log/detector:/var/log/detector:rw
-      - ./detector/config.yaml:/app/config.yaml:ro
+      - ./config.yaml:/app/config.yaml:ro
 
     # Health check: hit the detector's /health endpoint.
     healthcheck:
