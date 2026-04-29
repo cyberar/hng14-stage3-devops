@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 # ============================================================
-# Daemon Orchestrator
-#
 # Entry point. It:
 #   1. Loads config
 #   2. Creates all component instances
@@ -36,8 +34,7 @@ from dashboard     import Dashboard
 from audit         import AuditLogger
 
 
-# ── Configure logging ─────────────────────────────────────────
-# Uses Python's standard logging. All modules share this config.
+# Configure logging
 logging.basicConfig(
     level  = logging.INFO,
     format = "%(asctime)s [%(levelname)s] %(name)s — %(message)s",
@@ -56,7 +53,7 @@ class AnomalyDetectorDaemon:
 
     def __init__(self, config_path: str = None):
         logger.info("=" * 60)
-        logger.info("  HNG Anomaly Detection Daemon — Starting")
+        logger.info("  HNG Anomaly Detection Daemon - Starting")
         logger.info("=" * 60)
 
         # Load configuration
@@ -92,7 +89,7 @@ class AnomalyDetectorDaemon:
             poll_interval = self.cfg["log"]["poll_interval"],
         )
 
-        # Wire the anomaly callback
+        # Fire the anomaly callback
         # When detector finds an anomaly, it calls this function.
         self.detector.set_anomaly_callback(self._on_anomaly)
 
@@ -230,8 +227,6 @@ class AnomalyDetectorDaemon:
 
 # Entry point
 if __name__ == "__main__":
-    # Allow passing a custom config path as CLI argument
-    # Usage: python main.py /path/to/config.yaml
     config_path = sys.argv[1] if len(sys.argv) > 1 else None
 
     daemon = AnomalyDetectorDaemon(config_path)

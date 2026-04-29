@@ -1,9 +1,9 @@
 # ============================================================
-# config_loader.py — Loads and validates config.yaml
+# Loads and validates config.yaml
 # A single shared function so every module reads the same config object.
 # ============================================================
 
-import yaml          # PyYAML — parses .yaml files into Python dicts
+import yaml  # parses .yaml files into Python dicts
 import os
 import sys
 import re
@@ -44,11 +44,11 @@ def load_config(path: str = None) -> dict:
     # 1. Build list of each config file candidate
     candidates = []
     if path:
-        candidates.append(path)                                      # explicit override
+        candidates.append(path)      # explicit override
 
     # Directory where THIS file lives (detector/)
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    candidates.append(os.path.join(script_dir, "config.yaml"))      # detector/config.yaml
+    candidates.append(os.path.join(script_dir, "config.yaml"))      # config.yaml
     candidates.append("/etc/detector/config.yaml")                   # system-wide fallback
 
     # 2. Try each candidate in order
@@ -60,7 +60,7 @@ def load_config(path: str = None) -> dict:
             _validate(cfg)                # blow up early if critical keys are missing
             return cfg
 
-    # 3. Nothing found — abort with a clear message
+    # 3. Nothing found - abort with a clear message
     print(f"[ERROR] config.yaml not found. Tried: {candidates}", file=sys.stderr)
     sys.exit(1)
 

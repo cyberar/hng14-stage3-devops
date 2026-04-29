@@ -11,7 +11,7 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 
-# ── Data structure for a single parsed log line ──────────────
+# Data structure for a single parsed log line
 @dataclass
 class LogEntry:
     """
@@ -37,8 +37,8 @@ class LogMonitor:
     # Initialize the monitor with the log file path and polling interval.
     def __init__(self, log_path: str, poll_interval: float = 0.1):
         """
-        log_path      — path to the Nginx JSON access log
-        poll_interval — how often (seconds) to check for new lines when idle
+        log_path      - path to the Nginx JSON access log
+        poll_interval - how often (seconds) to check for new lines when idle
         
         """
         self.log_path      = log_path
@@ -124,7 +124,7 @@ class LogMonitor:
             except Exception:
                 pass
 
-        # Open in text mode — Nginx writes UTF-8 text
+        # Open in text mode - Nginx writes UTF-8 text
         self._file = open(self.log_path, "r", encoding="utf-8", errors="replace")
 
         if seek_end:
@@ -189,7 +189,7 @@ class LogMonitor:
             status    = int(data.get("status", 0))
             response_size = int(data.get("response_size", 0))
 
-            # Parse timestamp — Nginx writes ISO 8601 format
+            # Parse timestamp - Nginx writes ISO 8601 format
             ts_raw = data.get("timestamp", "")
             try:
                 # Handle timezone offset formats like "+00:00"
@@ -209,8 +209,7 @@ class LogMonitor:
             )
 
         except json.JSONDecodeError:
-            # Not valid JSON — Nginx might have written a partial line,
-            # or there could be some other non-JSON log output.
+            # Not valid JSON - skip this line but log a warning
             logger.debug(f"Skipping non-JSON line: {line[:80]}")
             return None
 

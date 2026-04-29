@@ -2,11 +2,11 @@
 # Anomaly Detection Engine
 #
 # Maintains two deque-based sliding windows:
-#   • Per-IP window   — tracks requests per IP in the last 60 seconds
-#   • Global window   — tracks ALL requests in the last 60 seconds
+#   • Per-IP window   - tracks requests per IP in the last 60 seconds
+#   • Global window   - tracks ALL requests in the last 60 seconds
 #
 # On every new request, it checks whether any anomaly condition fires.
-# When it does, it calls back into the orchestrator (main.py) to trigger
+# When it does, it calls back into the main.py to trigger
 # blocking and alerting.
 # ============================================================
 
@@ -50,17 +50,17 @@ class SlidingWindowDetector:
 
     def __init__(self, cfg: dict, baseline: BaselineEngine):
         """
-        cfg      — full config dict (we use 'sliding_window' and 'detection' sections)
-        baseline — shared BaselineEngine instance to read mean/stddev from
+        cfg      - full config dict (we use 'sliding_window' and 'detection' sections)
+        baseline - shared BaselineEngine instance to read mean/stddev from
         """
         detection_cfg = cfg["detection"]
         window_cfg    = cfg["sliding_window"]
 
-        # Window size — how far back we look when computing rates
+        # Window size in seconds for the per-IP and global windows
         self.window_seconds        = window_cfg["window_seconds"]         # per-IP window
         self.global_window_seconds = window_cfg["global_window_seconds"]  # global window
 
-        # Detection thresholds — pulled from config
+        # Detection thresholds pulled from config
         self.z_score_threshold     = detection_cfg["z_score_threshold"]    # default 3.0
         self.rate_multiplier       = detection_cfg["rate_multiplier"]      # default 5.0×
         self.error_rate_multiplier = detection_cfg["error_rate_multiplier"]# default 3.0×
@@ -135,7 +135,7 @@ class SlidingWindowDetector:
             if is_error:
                 self._ip_error_windows[ip].append(ts)
 
-            # 2. Evict stale entries
+            # 2. Evict old entries
             ip_cutoff     = now - self.window_seconds
             global_cutoff = now - self.global_window_seconds
 
@@ -211,12 +211,12 @@ class SlidingWindowDetector:
         Check whether a single IP's behaviour is anomalous.
         Returns an AnomalyEvent if anomaly detected, None otherwise.
         """
-        # Cooldown check — if this IP was flagged recently, skip to prevent alert fatigue.
+        # Cooldown check - if this IP was flagged recently, skip to prevent alert flooding
         last_flagged = self._recently_flagged.get(ip, 0)
         if now - last_flagged < self._flag_cooldown:
             return None   # still in cooldown period
 
-        # Error surge check — if the IP's error rate is high, tighten the z-score threshold
+        # Error surge check - if the IP's error rate is high, tighten the z-score threshold
         error_surge = ip_err_rate > (err_mean * self.error_rate_multiplier)
         effective_z = self.tightened_z_score if error_surge else self.z_score_threshold
 
@@ -238,7 +238,7 @@ class SlidingWindowDetector:
                 is_error_surge  = error_surge,
             )
 
-        # Rate multiplier check — catches cases where stddev is very small and z-score might not trigger
+        # Rate multiplier check - catches cases where stddev is very small and z-score might not trigger
         if ip_rate > mean * self.rate_multiplier:
             self._recently_flagged[ip] = now
             return AnomalyEvent(

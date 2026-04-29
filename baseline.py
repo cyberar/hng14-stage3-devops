@@ -4,12 +4,12 @@
 # Learns what "normal" traffic looks like by maintaining a
 # rolling 30-minute window of per-second request counts.
 #
-# Key ideas:
-#  • Per-second buckets — we count how many requests arrived each second
-#  • Rolling window — we only keep the last 30 minutes (1800 buckets)
-#  • Per-hour slots — traffic at 3am ≠ traffic at 3pm, so we track both
-#  • Recalculation — every 60 seconds, recompute mean + stddev from the window
-#  • Floor values — prevent false alarms during very quiet periods
+# Key functions:
+#  • Per-second buckets - count how many requests arrived each second
+#  • Rolling window - only keep the last 30 minutes (1800 buckets)
+#  • Per-hour slots - traffic at 3am is different from 3pm, so keep separate windows for each hour of the day
+#  • Recalculation - every 60 seconds, recompute mean + stddev from the window
+#  • Floor values - prevent false alarms during very quiet periods
 # ============================================================
 
 import time           # time.time() for current epoch timestamp
@@ -30,12 +30,12 @@ class BaselineEngine:
     that the detector uses to compute z-scores.
 
     Thread-safe: the detector thread reads baseline values while the
-    monitor thread writes new counts — we use a Lock to coordinate.
+    monitor thread writes new counts - we use a Lock to coordinate.
     """
 
     def __init__(self, cfg: dict):
         """
-        cfg — the 'baseline' section of config.yaml
+        cfg - the 'baseline' section of config.yaml
         """
         # How many seconds of history to keep (30 min × 60 sec = 1800)
         self.window_seconds   = cfg["window_minutes"] * 60
@@ -80,7 +80,6 @@ class BaselineEngine:
         self._last_recalc: float = time.time()
 
         # History of recalculations for audit log and dashboard graph
-        # Each entry: {"time": ..., "mean": ..., "stddev": ..., "samples": ...}
         self.recalc_history: list = []
 
         # Thread lock
@@ -99,18 +98,18 @@ class BaselineEngine:
         Record one incoming request at the given epoch timestamp.
         Called for EVERY log entry — must be fast (O(1)).
 
-        timestamp — epoch float (seconds since 1970)
-        is_error  — True if status code was 4xx or 5xx
+        timestamp - epoch float (seconds since 1970)
+        is_error  - True if status code was 4xx or 5xx
         """
         second = int(timestamp)   # truncate to whole second
 
         with self._lock:
             if second == self._current_second:
-                # Same second as before — just increment the counter
+                # Same second as before - just increment the count
                 self._current_count  += 1
                 self._current_errors += (1 if is_error else 0)
             else:
-                # New second started — flush the completed second's count
+                # New second started, flush the completed second's count
                 # into the rolling windows, then start fresh.
                 self._flush_current_second()
                 self._current_second = second
@@ -175,7 +174,7 @@ class BaselineEngine:
         """
         entry = (self._current_second, self._current_count, self._current_errors)
 
-        # Add to global window — deque automatically evicts oldest if full
+        # Add to global window - deque automatically evicts oldest if full
         self._global_window.append(entry)
 
         # Add to the appropriate per-hour slot

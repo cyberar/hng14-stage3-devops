@@ -5,13 +5,6 @@
 #   1. Adds an iptables DROP rule (packets never reach Nginx)
 #   2. Records the ban with its expiry time and offense count
 #   3. Writes an audit log entry
-#
-# iptables works at the Linux kernel level — the kernel drops
-# matching packets before they ever enter user space.
-# Command: iptables -I INPUT -s <ip> -j DROP
-#   -I INPUT  = Insert at top of INPUT chain (checked first)
-#   -s <ip>   = Match packets FROM this source IP
-#   -j DROP   = Silently discard the packet (no response sent)
 # ============================================================
 
 import subprocess    # runs iptables as a shell command
@@ -47,17 +40,15 @@ class Blocker:
 
     def __init__(self, cfg: dict, audit_log):
         """
-        cfg       — full config dict (we use 'blocking' section)
-        audit_log — AuditLogger instance for writing structured log entries
+        cfg       - full config dict (we use 'blocking' section)
+        audit_log - AuditLogger instance for writing structured log entries
         """
         blockerCfg = cfg["blocking"]
 
-        # Whether to actually run iptables commands.
-        # Set enabled=false in config to run in alert-only mode.
+        # Whether to actually execute iptables commands, or just log what we would do.
         self.enabled = blockerCfg["enabled"]
 
-        # Ban duration schedule (minutes), indexed by offense number.
-        # [10, 30, 120] means: 1st offense=10min, 2nd=30min, 3rd=120min
+        # Ban duration schedule (minutes), indexed by offense number
         self.ban_schedule = blockerCfg["ban_schedule_minutes"]
 
         # after many offense, permanently ban the IP

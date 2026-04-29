@@ -1,18 +1,18 @@
 # ============================================================
-# config.yaml — Central configuration for the anomaly detector
+# Central configuration for the anomaly detector
 # ============================================================
 
-# ── Log file path ────────────────────────────────────────────
+# Log file path
 log:
   path: "/var/log/nginx/hng-access.log"   # shared via HNG-nginx-logs volume
   poll_interval: 0.1                        # seconds between file-read attempts (keep low)
 
-# ── Sliding window settings ──────────────────────────────────
+# Sliding window parameters
 sliding_window:
   window_seconds: 60          # look at the last 60 seconds of traffic
   global_window_seconds: 60   # same for the global (all-IP combined) window
 
-# ── Baseline / rolling statistics ────────────────────────────
+# Baseline / rolling statistics
 baseline:
   window_minutes: 30          # keep 30 minutes of per-second history
   recalc_interval: 60         # recalculate baseline every 60 seconds
@@ -22,32 +22,32 @@ baseline:
   hourly_slots: true          # maintain separate baselines per hour-of-day (0–23)
   hourly_min_samples: 60      # minimum samples before trusting an hourly slot
 
-# ── Detection thresholds ──────────────────────────────────────
+# Detection thresholds
 detection:
   z_score_threshold: 3.0      # flag if z-score exceeds this value
   rate_multiplier: 5.0        # flag if rate > 5× the baseline mean
   error_rate_multiplier: 3.0  # flag if IP 4xx/5xx rate > 3× baseline error rate
   tightened_z_score: 2.0      # tighter z-score for IPs already showing high error rates
 
-# ── Blocking / banning ───────────────────────────────────────
+# Blocking / banning parameters
 blocking:
-  enabled: true               # set false to run in "alert-only" mode (useful for testing)
+  enabled: true               # set false to run in "alert-only" mode 
   ban_schedule_minutes:       # indexed by offense count (0-based)
     - 10                      # 1st offense: 10 minutes
     - 30                      # 2nd offense: 30 minutes
     - 120                     # 3rd offense: 2 hours
   permanent_after: 3          # offense index at which ban becomes permanent (0-based: 4th offense)
 
-# ── Slack notifications ───────────────────────────────────────
+# Slack notifications
 slack:
   endpoint: ${SLACK_WEBHOOK_URL}  # set in .env file, not hardcoded here for security
   enabled: true
   timeout_seconds: 5          # HTTP request timeout for Slack API calls
 
-# ── Dashboard web server ─────────────────────────────────────
+# Dashboard web server
 dashboard:
   host: "0.0.0.0"             # listen on all interfaces
-  port: 8080                  # dashboard served at http://<your-domain>:8080
+  port: 8080                  # dashboard served at http://<my-domain>:8080
   refresh_interval: 3         # frontend auto-refresh every 3 seconds
   top_ips_count: 10           # how many top IPs to show in the table
 

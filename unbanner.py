@@ -27,7 +27,7 @@ class Unbanner:
     Background daemon thread that periodically checks for expired bans
     and releases them via the Blocker.
 
-    Runs as a daemon thread — it dies automatically when the main process exits,
+    Runs as a daemon thread - it dies automatically when the main process exits,
     so we don't need explicit shutdown logic.
     """
 

@@ -28,7 +28,7 @@ class Notifier:
 
     def __init__(self, cfg: dict):
         """
-        cfg — full config dict (we use the 'slack' section)
+        cfg - full config dict (we use the 'slack' section)
         """
         sc = cfg["slack"]
         self.webhook_url = sc["endpoint"]
@@ -150,7 +150,7 @@ class Notifier:
                 self._post(payload)
                 self._queue.task_done()
             except queue.Empty:
-                continue   # no messages — loop and check again
+                continue   # no messages, loop and wait again
             except Exception as e:
                 logger.error(f"Slack sender loop error: {e}")
 
@@ -161,7 +161,7 @@ class Notifier:
         """
         body = json.dumps(payload).encode("utf-8")
 
-        # Build the HTTP request manually — avoids needing the `requests` library
+        # Build the HTTP request manually
         req = urllib.request.Request(
             url     = self.webhook_url,
             data    = body,

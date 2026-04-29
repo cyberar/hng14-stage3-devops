@@ -1,10 +1,7 @@
 # ============================================================
 # Structured Audit Logger
-#
 # Writes one line per significant event in a structured format:
 #   [timestamp] ACTION ip | condition | rate | baseline | duration
-#
-# Every ban, unban, and baseline recalculation gets its own line.
 # ============================================================
 
 import os
@@ -28,13 +25,13 @@ class AuditLogger:
         """
         self.log_path = log_path
 
-        # Ensure the directory exists — create it if not
+        # Ensure the directory exists - create it if not
         os.makedirs(os.path.dirname(log_path), exist_ok=True)
 
         # Thread lock prevents two threads writing the same line simultaneously
         self._lock = threading.Lock()
 
-        # Open in append mode — we never overwrite existing entries
+        # Open in append mode with line buffering and UTF-8 encoding
         self._file = open(log_path, "a", buffering=1, encoding="utf-8")
 
         logger.info(f"Audit log opened: {log_path}")
