@@ -1,4 +1,4 @@
-# DDOS Detection Engine — cloud.ng
+# DDOS Detection Engine - cloud.ng
 
 A Distributed Denial-of-Service (DDoS) attack is a malicious attempt to disrupt normal traffic of a targeted server,
 service, or network by overwhelming it with a flood of Internet traffic from multiple, compromised sources (a 
@@ -13,14 +13,14 @@ This project is part of HNG14 stage 3 task.
 
 | Resource | URL |
 |---|---|
-| **Server IP** | `MY_SERVER_IP` |
+| **Server IP** | `32.194.87.246` |
 | **Metrics Dashboard** | `http://kemicodes.online:8080` |
 | **GitHub Repo** | `https://github.com/cyberar/hng14-stage3-devops` |
-| **Blog Post** | `https://dev.to/yourusername/how-i-built-a-ddos-detector` |
+| **Blog Post** | `https://adekemiadisa.hashnode.dev/how-i-built-a-real-time-ddos-detection-engine-from-scratch` |
 
 ---
 
-## Language Choice — Python
+## Language Choice - Python
 
 Apart from **Python** being my first choice of language, I chose it for four specific reasons:
 
@@ -153,22 +153,7 @@ The baseline is not trusted until it has collected at least **30 data points**. 
 ## Architecture
 
 ```
-Internet Traffic
-      |
-  [ Nginx :80 ]
-  (reverse proxy)
-  writes JSON logs -> HNG-nginx-logs volume
-      |
-  [ Nextcloud ]
-  cloud storage app
-  (pre-built, unmodified)
-      |
-  [ Detector Daemon ]
-  reads logs from volume
-      │
-      |--> iptables    (blocks bad IPs at kernel level)
-      |--> Slack       (sends ban/unban/global alerts)
-      |--> Dashboard   (http://kemicodes.online:8080)
+![architecture](docs/architecture.png)
 ```
 
 ### Module Breakdown
@@ -216,7 +201,7 @@ If an IP's 4xx/5xx error rate exceeds 3× the baseline error rate, its z-score t
 
 ---
 
-## Setup Instructions — Fresh VPS to Full Stack
+## Setup Instructions
 
 ### 1. Provision the Server
 
