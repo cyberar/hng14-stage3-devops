@@ -35,6 +35,8 @@ services:
 
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro # mount custom nginx/nginx.conf to the default
+      - /etc/letsencrypt/live:/etc/letsencrypt/live:ro          
+      - /etc/letsencrypt/archive:/etc/letsencrypt/archive:ro
       - HNG-nginx-logs:/var/log/nginx:rw    # ":rw" = read-write shared access log
     networks:
       - hng-net
